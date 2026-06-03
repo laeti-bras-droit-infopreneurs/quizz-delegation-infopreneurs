@@ -1,0 +1,755 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Quiz — Dois-je déléguer ?</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;1,400&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --ink: #1a1208;
+    --cream: #faf7f2;
+    --terracotta: #c45c3a;
+    --terracotta-light: #e8795a;
+    --gold: #c9943a;
+    --sage: #6b8c6b;
+    --muted: #8c7a6a;
+    --border: #e8ddd0;
+    --card: #ffffff;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    font-family: 'DM Sans', sans-serif;
+    background: var(--cream);
+    color: var(--ink);
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: flex-start;
+    padding: 40px 20px 60px;
+  }
+
+  /* HERO */
+  .hero {
+    text-align: center;
+    max-width: 580px;
+    margin-bottom: 40px;
+    animation: fadeUp 0.6s ease both;
+  }
+  .hero-tag {
+    display: inline-block;
+    font-size: 0.72rem;
+    font-weight: 600;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    color: var(--terracotta);
+    background: rgba(196,92,58,0.08);
+    padding: 5px 14px;
+    border-radius: 20px;
+    margin-bottom: 16px;
+  }
+  .hero h1 {
+    font-family: 'Playfair Display', serif;
+    font-size: clamp(1.8rem, 5vw, 2.6rem);
+    font-weight: 700;
+    line-height: 1.2;
+    margin-bottom: 14px;
+    color: var(--ink);
+  }
+  .hero h1 em {
+    font-style: italic;
+    color: var(--terracotta);
+  }
+  .hero p {
+    font-size: 0.95rem;
+    color: var(--muted);
+    line-height: 1.6;
+  }
+
+  /* PROGRESS */
+  .progress-wrap {
+    width: 100%;
+    max-width: 580px;
+    margin-bottom: 28px;
+    animation: fadeUp 0.6s 0.1s ease both;
+  }
+  .progress-info {
+    display: flex;
+    justify-content: space-between;
+    font-size: 0.78rem;
+    color: var(--muted);
+    margin-bottom: 8px;
+    font-weight: 500;
+  }
+  .progress-bar {
+    background: var(--border);
+    border-radius: 20px;
+    height: 6px;
+    overflow: hidden;
+  }
+  .progress-fill {
+    height: 100%;
+    background: linear-gradient(90deg, var(--gold), var(--terracotta));
+    border-radius: 20px;
+    transition: width 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+
+  /* CARD */
+  .card {
+    background: var(--card);
+    border-radius: 20px;
+    border: 1px solid var(--border);
+    box-shadow: 0 4px 30px rgba(30,15,5,0.08);
+    padding: 36px 40px;
+    max-width: 580px;
+    width: 100%;
+    animation: fadeUp 0.5s 0.15s ease both;
+  }
+
+  .question-num {
+    font-size: 0.72rem;
+    font-weight: 700;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    color: var(--terracotta);
+    margin-bottom: 12px;
+  }
+  .question-text {
+    font-family: 'Playfair Display', serif;
+    font-size: 1.25rem;
+    font-weight: 700;
+    line-height: 1.4;
+    margin-bottom: 28px;
+    color: var(--ink);
+  }
+
+  /* OPTIONS */
+  .options { display: flex; flex-direction: column; gap: 10px; }
+  .option {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    padding: 14px 18px;
+    border: 2px solid var(--border);
+    border-radius: 12px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    background: var(--cream);
+    font-size: 0.9rem;
+    color: var(--ink);
+    font-weight: 400;
+    text-align: left;
+  }
+  .option:hover {
+    border-color: var(--terracotta);
+    background: rgba(196,92,58,0.04);
+    transform: translateX(4px);
+  }
+  .option.selected {
+    border-color: var(--terracotta);
+    background: rgba(196,92,58,0.07);
+    font-weight: 500;
+  }
+  .option.selected .opt-dot {
+    background: var(--terracotta);
+    border-color: var(--terracotta);
+  }
+  .option.selected .opt-dot::after {
+    opacity: 1;
+  }
+  .opt-dot {
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    border: 2px solid var(--border);
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.2s;
+    position: relative;
+  }
+  .opt-dot::after {
+    content: '';
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: white;
+    opacity: 0;
+    transition: opacity 0.2s;
+  }
+
+  /* NAV */
+  .nav {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-top: 28px;
+  }
+  .btn-back {
+    background: transparent;
+    border: 1px solid var(--border);
+    color: var(--muted);
+    border-radius: 10px;
+    padding: 10px 20px;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 0.85rem;
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+  .btn-back:hover { background: var(--ink); color: white; border-color: var(--ink); }
+  .btn-next {
+    background: var(--terracotta);
+    color: white;
+    border: none;
+    border-radius: 10px;
+    padding: 12px 28px;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 0.9rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s;
+    opacity: 0.4;
+    pointer-events: none;
+  }
+  .btn-next.active {
+    opacity: 1;
+    pointer-events: all;
+  }
+  .btn-next.active:hover { background: #b04f30; transform: translateY(-1px); }
+
+  /* RESULT */
+  .result {
+    display: none;
+    max-width: 580px;
+    width: 100%;
+    animation: fadeUp 0.6s ease both;
+  }
+  .result-card {
+    background: var(--card);
+    border-radius: 20px;
+    border: 1px solid var(--border);
+    box-shadow: 0 4px 30px rgba(30,15,5,0.08);
+    padding: 40px;
+    text-align: center;
+    margin-bottom: 20px;
+  }
+  .result-emoji { font-size: 3rem; margin-bottom: 16px; }
+  .result-score {
+    font-family: 'Playfair Display', serif;
+    font-size: 3.5rem;
+    font-weight: 700;
+    color: var(--terracotta);
+    line-height: 1;
+    margin-bottom: 4px;
+  }
+  .result-score-label {
+    font-size: 0.78rem;
+    color: var(--muted);
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    margin-bottom: 20px;
+  }
+  .result-title {
+    font-family: 'Playfair Display', serif;
+    font-size: 1.5rem;
+    font-weight: 700;
+    margin-bottom: 12px;
+    color: var(--ink);
+  }
+  .result-desc {
+    font-size: 0.92rem;
+    color: var(--muted);
+    line-height: 1.7;
+    margin-bottom: 28px;
+  }
+  .result-tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    justify-content: center;
+    margin-bottom: 28px;
+  }
+  .result-tag {
+    font-size: 0.78rem;
+    font-weight: 600;
+    padding: 5px 14px;
+    border-radius: 20px;
+    background: rgba(196,92,58,0.08);
+    color: var(--terracotta);
+  }
+  .result-cta {
+    background: var(--ink);
+    color: var(--cream);
+    border: none;
+    border-radius: 12px;
+    padding: 14px 32px;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 0.92rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s;
+    display: block;
+    width: 100%;
+  }
+  .result-cta:hover { background: var(--terracotta); }
+
+  .result-detail {
+    background: var(--card);
+    border-radius: 16px;
+    border: 1px solid var(--border);
+    padding: 24px 28px;
+  }
+  .result-detail h3 {
+    font-family: 'Playfair Display', serif;
+    font-size: 1rem;
+    margin-bottom: 14px;
+    color: var(--ink);
+  }
+  .detail-item {
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+    padding: 10px 0;
+    border-bottom: 1px solid var(--border);
+    font-size: 0.86rem;
+  }
+  .detail-item:last-child { border-bottom: none; }
+  .detail-icon { font-size: 1rem; flex-shrink: 0; margin-top: 1px; }
+  .detail-text { color: var(--muted); line-height: 1.5; }
+
+  /* CAPTURE FORM */
+  .capture-card {
+    background: var(--ink);
+    border-radius: 20px;
+    padding: 32px 40px;
+    max-width: 580px;
+    width: 100%;
+    margin-bottom: 16px;
+    color: var(--cream);
+    text-align: center;
+    animation: fadeUp 0.5s ease both;
+  }
+  .capture-card h3 {
+    font-family: 'Playfair Display', serif;
+    font-size: 1.3rem;
+    margin-bottom: 8px;
+    color: var(--cream);
+  }
+  .capture-card p {
+    font-size: 0.85rem;
+    color: #b0a090;
+    margin-bottom: 22px;
+    line-height: 1.6;
+  }
+  .capture-fields { display: flex; flex-direction: column; gap: 10px; margin-bottom: 14px; }
+  .capture-input {
+    background: rgba(255,255,255,0.08);
+    border: 1px solid rgba(255,255,255,0.15);
+    border-radius: 10px;
+    padding: 12px 16px;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 0.88rem;
+    color: var(--cream);
+    outline: none;
+    transition: border-color 0.2s;
+    width: 100%;
+  }
+  .capture-input::placeholder { color: #7a6a5a; }
+  .capture-input:focus { border-color: var(--terracotta); }
+  .btn-capture {
+    background: var(--terracotta);
+    color: white;
+    border: none;
+    border-radius: 10px;
+    padding: 13px 28px;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 0.9rem;
+    font-weight: 600;
+    cursor: pointer;
+    width: 100%;
+    transition: background 0.2s;
+  }
+  .btn-capture:hover { background: var(--terracotta-light); }
+  .capture-skip {
+    font-size: 0.75rem;
+    color: #7a6a5a;
+    margin-top: 10px;
+    cursor: pointer;
+    text-decoration: underline;
+    display: block;
+  }
+  .capture-skip:hover { color: #b0a090; }
+  .capture-success {
+    background: rgba(107,140,107,0.15);
+    border: 1px solid var(--sage);
+    border-radius: 10px;
+    padding: 14px;
+    font-size: 0.88rem;
+    color: var(--sage);
+    margin-top: 10px;
+    display: none;
+  }
+
+  .btn-restart {
+    background: transparent;
+    border: 1px solid var(--border);
+    color: var(--muted);
+    border-radius: 10px;
+    padding: 10px 20px;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 0.85rem;
+    cursor: pointer;
+    margin-top: 16px;
+    transition: all 0.2s;
+    display: block;
+    width: 100%;
+  }
+  .btn-restart:hover { background: var(--ink); color: white; border-color: var(--ink); }
+
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(16px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  .hidden { display: none !important; }
+
+  @media (max-width: 600px) {
+    .card, .result-card, .result-detail { padding: 24px 20px; }
+    .hero h1 { font-size: 1.6rem; }
+  }
+</style>
+</head>
+<body>
+
+<!-- HERO -->
+<div class="hero" id="hero">
+  <div class="hero-tag">Quiz · 2 minutes</div>
+  <h1>Dois-je <em>déléguer</em> mon marketing ?</h1>
+  <p>7 questions pour savoir si tu es prêt(e) à te concentrer sur ta zone de génie — et laisser quelqu'un d'autre tenir la machine.</p>
+</div>
+
+<!-- PROGRESS -->
+<div class="progress-wrap hidden" id="progress-wrap">
+  <div class="progress-info">
+    <span id="progress-label">Question 1 sur 7</span>
+    <span id="progress-pct">0 %</span>
+  </div>
+  <div class="progress-bar">
+    <div class="progress-fill" id="progress-fill" style="width: 0%"></div>
+  </div>
+</div>
+
+<!-- QUIZ -->
+<div class="card hidden" id="quiz-card">
+  <div class="question-num" id="q-num">Question 1 / 7</div>
+  <div class="question-text" id="q-text"></div>
+  <div class="options" id="q-options"></div>
+  <div class="nav">
+    <button class="btn-back" id="btn-back" onclick="prevQuestion()">← Retour</button>
+    <button class="btn-next" id="btn-next" onclick="nextQuestion()">Suivant →</button>
+  </div>
+</div>
+
+<!-- START -->
+<div class="card" id="start-card">
+  <div class="question-num">Prêt(e) ?</div>
+  <div class="question-text">En 7 questions, découvre si tu as besoin d'un bras droit marketing — et ce que tu pourrais déléguer dès maintenant.</div>
+  <div style="margin-top: 28px;">
+    <button class="btn-next active" style="width:100%; padding:14px;" onclick="startQuiz()">Commencer le quiz →</button>
+  </div>
+</div>
+
+<!-- RESULT -->
+<div class="result hidden" id="result">
+  <div class="capture-card" id="capture-card">
+    <h3>✦ Reçois ton analyse complète</h3>
+    <p>Laisse ton email ou ton compte Instagram — je t'envoie des conseils personnalisés selon ton profil.</p>
+    <div class="capture-fields">
+      <input type="email" class="capture-input" id="capture-email" placeholder="📧 Ton adresse email" />
+      <input type="text" class="capture-input" id="capture-insta" placeholder="📱 Ton compte Instagram (@...)" />
+    </div>
+    <button class="btn-capture" onclick="submitCapture()">Recevoir mes conseils personnalisés →</button>
+    <div class="capture-success" id="capture-success">✓ Reçu ! Je reviens vers toi rapidement 🙌</div>
+    <span class="capture-skip" onclick="skipCapture()">Non merci, je veux juste voir mes résultats</span>
+  </div>
+
+  <div id="result-content" style="display:none; width:100%; max-width:580px; flex-direction:column; gap:16px;">
+    <div class="result-card" id="result-card"></div>
+    <div class="result-detail" id="result-detail"></div>
+  </div>
+  <button class="btn-restart" onclick="restartQuiz()">↩ Recommencer le quiz</button>
+</div>
+
+<script>
+const questions = [
+  {
+    text: "Combien d'heures par semaine passes-tu sur des tâches marketing (posts, newsletter, outils…) ?",
+    options: [
+      { label: "Moins de 2h — je délègue déjà ou je ne fais presque rien", score: 0 },
+      { label: "Entre 2h et 5h — c'est gérable mais ça prend du temps", score: 1 },
+      { label: "Entre 5h et 10h — c'est une vraie charge", score: 2 },
+      { label: "Plus de 10h — ça bouffe ma semaine", score: 3 }
+    ]
+  },
+  {
+    text: "Ta to-do liste marketing… elle ressemble à quoi en ce moment ?",
+    options: [
+      { label: "Elle est vide ou presque — tout est à jour", score: 0 },
+      { label: "Quelques tâches en retard, rien d'alarmant", score: 1 },
+      { label: "Elle grossit chaque semaine sans jamais se vider", score: 2 },
+      { label: "C'est un cimetière de tâches que je reporte depuis des semaines", score: 3 }
+    ]
+  },
+  {
+    text: "Quand tu crées du contenu, tu te sens comment ?",
+    options: [
+      { label: "À l'aise, j'aime ça et je le fais régulièrement", score: 0 },
+      { label: "Je le fais mais c'est pas ma partie préférée", score: 1 },
+      { label: "Je le repousse souvent, c'est une vraie friction", score: 2 },
+      { label: "Je le déteste, je le fais le moins possible", score: 3 }
+    ]
+  },
+  {
+    text: "Est-ce que tu as déjà repoussé le lancement d'une offre ou d'une formation à cause du marketing ?",
+    options: [
+      { label: "Non, jamais", score: 0 },
+      { label: "Une fois ou deux, mais rien de grave", score: 1 },
+      { label: "Oui, plusieurs fois — c'est un vrai frein", score: 2 },
+      { label: "Oui, systématiquement. J'ai des projets qui attendent depuis des mois", score: 3 }
+    ]
+  },
+  {
+    text: "Comment tu gères tes outils marketing (CRM, newsletter, tunnel, réseaux) ?",
+    options: [
+      { label: "Tout est en place et bien rodé", score: 0 },
+      { label: "C'est fonctionnel mais perfectible", score: 1 },
+      { label: "C'est le bazar, j'ai jamais vraiment le temps de tout organiser", score: 2 },
+      { label: "Quels outils ? J'improvise à chaque fois", score: 3 }
+    ]
+  },
+  {
+    text: "Si tu pouvais récupérer 5h par semaine, tu les mettrais dans quoi ?",
+    options: [
+      { label: "Je sais pas, j'ai pas vraiment de projet en attente", score: 0 },
+      { label: "Améliorer mon offre ou ma pédagogie", score: 1 },
+      { label: "Créer du contenu à plus forte valeur ajoutée", score: 2 },
+      { label: "Lancer des projets qui dorment depuis trop longtemps", score: 3 }
+    ]
+  },
+  {
+    text: "Honnêtement, est-ce que tu penses que le marketing ralentit ta croissance ?",
+    options: [
+      { label: "Non, c'est bien géré", score: 0 },
+      { label: "Un peu, mais j'arrive à avancer quand même", score: 1 },
+      { label: "Oui, clairement — je suis limité(e) par ça", score: 2 },
+      { label: "Oui, et ça me frustre énormément", score: 3 }
+    ]
+  }
+];
+
+const results = [
+  {
+    min: 0, max: 5,
+    emoji: "🌱",
+    title: "Tu gères bien — pour l'instant.",
+    desc: "Tu as une organisation solide et le marketing ne semble pas être un frein majeur. Mais attention : plus ton activité va grandir, plus ça va peser. C'est le bon moment pour anticiper une délégation partielle avant d'être débordé(e).",
+    tags: ["Bien organisé", "Anticiper la croissance", "Délégation partielle"],
+    actions: [
+      { icon: "📋", text: "Identifie les 2 tâches récurrentes les moins importantes que tu pourrais déléguer en premier." },
+      { icon: "🔍", text: "Commence à explorer ce que ça coûterait vraiment de déléguer." },
+      { icon: "💡", text: "Pose-toi la question : dans 6 mois, tu veux encore tout faire seul(e) ?" }
+    ]
+  },
+  {
+    min: 6, max: 11,
+    emoji: "⚡",
+    title: "Tu ressens la pression — mais tu résistes encore.",
+    desc: "Le marketing prend de la place sans que tu aies vraiment le temps de le faire bien. Tu avances, mais à quel prix ? La délégation n'est plus un luxe — c'est une décision stratégique pour passer au niveau supérieur.",
+    tags: ["Charge croissante", "Manque de temps", "Délégation urgente"],
+    actions: [
+      { icon: "🎯", text: "Liste tout ce que tu fais en marketing cette semaine. Raye ce que tu ne devrais plus faire toi-même." },
+      { icon: "📅", text: "Calcule combien d'heures tu récupèrerais en déléguant juste tes réseaux et ta newsletter." },
+      { icon: "🤝", text: "C'est le bon moment pour parler à un bras droit marketing." }
+    ]
+  },
+  {
+    min: 12, max: 17,
+    emoji: "🔥",
+    title: "Le marketing te freine sérieusement.",
+    desc: "Tu passes trop de temps sur des tâches qui ne sont pas ta zone de génie. Des projets attendent, des idées dorment, et tu sais que tu pourrais aller beaucoup plus loin si tu avais du soutien. Il est temps d'agir.",
+    tags: ["Bloqué(e)", "Projets en attente", "Délégation nécessaire"],
+    actions: [
+      { icon: "🚨", text: "Identifie les 3 tâches marketing qui te coûtent le plus d'énergie — c'est ton premier chantier à déléguer." },
+      { icon: "💸", text: "Pense au coût réel de ne pas déléguer : projets repoussés, énergie gaspillée, croissance ralentie." },
+      { icon: "✉️", text: "Contacte un bras droit marketing pour un premier échange — sans engagement." }
+    ]
+  },
+  {
+    min: 18, max: 21,
+    emoji: "🆘",
+    title: "Tu te noies. Et tu le sais.",
+    desc: "Le marketing est devenu un boulet. Tu as une vraie expertise, une vraie valeur à apporter — mais tu passes ton temps à gérer des choses qui t'épuisent et t'éloignent de ce qui compte. La question n'est plus 'est-ce que je devrais déléguer ?' mais 'pourquoi j'ai pas encore commencé ?'",
+    tags: ["Épuisement", "Urgence totale", "Déléguer maintenant"],
+    actions: [
+      { icon: "🛑", text: "Stop. Fais la liste de tout ce que tu fais en marketing. Tout." },
+      { icon: "🎯", text: "Choisis une seule tâche à déléguer cette semaine. Juste une. Et délègue-la vraiment." },
+      { icon: "💬", text: "Parle à quelqu'un maintenant — un bras droit marketing peut prendre le relais rapidement." }
+    ]
+  }
+];
+
+let current = 0;
+let answers = new Array(questions.length).fill(null);
+let scores = new Array(questions.length).fill(0);
+
+function startQuiz() {
+  document.getElementById('start-card').classList.add('hidden');
+  document.getElementById('progress-wrap').classList.remove('hidden');
+  document.getElementById('quiz-card').classList.remove('hidden');
+  renderQuestion();
+}
+
+function renderQuestion() {
+  const q = questions[current];
+  document.getElementById('q-num').textContent = `Question ${current + 1} / ${questions.length}`;
+  document.getElementById('q-text').textContent = q.text;
+
+  const opts = document.getElementById('q-options');
+  opts.innerHTML = '';
+  q.options.forEach((opt, i) => {
+    const div = document.createElement('div');
+    div.className = 'option' + (answers[current] === i ? ' selected' : '');
+    div.innerHTML = `<div class="opt-dot"></div><span>${opt.label}</span>`;
+    div.onclick = () => selectOption(i, opt.score);
+    opts.appendChild(div);
+  });
+
+  const pct = Math.round((current / questions.length) * 100);
+  document.getElementById('progress-fill').style.width = pct + '%';
+  document.getElementById('progress-pct').textContent = pct + ' %';
+  document.getElementById('progress-label').textContent = `Question ${current + 1} sur ${questions.length}`;
+
+  const btnNext = document.getElementById('btn-next');
+  btnNext.textContent = current === questions.length - 1 ? 'Voir mes résultats →' : 'Suivant →';
+  btnNext.classList.toggle('active', answers[current] !== null);
+
+  document.getElementById('btn-back').style.visibility = current === 0 ? 'hidden' : 'visible';
+
+  document.getElementById('quiz-card').style.animation = 'none';
+  setTimeout(() => document.getElementById('quiz-card').style.animation = 'fadeUp 0.35s ease both', 10);
+}
+
+function selectOption(idx, score) {
+  answers[current] = idx;
+  scores[current] = score;
+  document.querySelectorAll('.option').forEach((el, i) => {
+    el.classList.toggle('selected', i === idx);
+  });
+  document.getElementById('btn-next').classList.add('active');
+}
+
+function nextQuestion() {
+  if (answers[current] === null) return;
+  if (current < questions.length - 1) {
+    current++;
+    renderQuestion();
+  } else {
+    showResult();
+  }
+}
+
+function prevQuestion() {
+  if (current > 0) { current--; renderQuestion(); }
+}
+
+function showResult() {
+  const total = scores.reduce((a, b) => a + b, 0);
+  const result = results.find(r => total >= r.min && total <= r.max);
+  window._quizResult = { total, result };
+
+  document.getElementById('progress-fill').style.width = '100%';
+  document.getElementById('progress-pct').textContent = '100 %';
+  document.getElementById('quiz-card').classList.add('hidden');
+  document.getElementById('progress-wrap').classList.add('hidden');
+  document.getElementById('hero').classList.add('hidden');
+
+  // Show capture form first
+  document.getElementById('capture-card').style.display = 'block';
+  document.getElementById('result').style.display = 'flex';
+  document.getElementById('result').style.flexDirection = 'column';
+  document.getElementById('result').classList.remove('hidden');
+}
+
+function renderResultContent() {
+  const { total, result } = window._quizResult;
+  const rc = document.getElementById('result-card');
+  rc.innerHTML = `
+    <div class="result-emoji">${result.emoji}</div>
+    <div class="result-score">${total}/21</div>
+    <div class="result-score-label">Score total</div>
+    <div class="result-title">${result.title}</div>
+    <div class="result-desc">${result.desc}</div>
+    <div class="result-tags">${result.tags.map(t => `<span class="result-tag">${t}</span>`).join('')}</div>
+    <button class="result-cta" onclick="window.open('https://www.instagram.com/laeti.assistante.infopreneurs?igsh=YnAyaDdkM251YWNs', '_blank')">👋 Parler à Laetitia — bras droit marketing</button>
+  `;
+  const rd = document.getElementById('result-detail');
+  rd.innerHTML = `
+    <h3>🎯 Tes 3 actions prioritaires</h3>
+    ${result.actions.map(a => `
+      <div class="detail-item">
+        <span class="detail-icon">${a.icon}</span>
+        <span class="detail-text">${a.text}</span>
+      </div>
+    `).join('')}
+  `;
+  const rc2 = document.getElementById('result-content');
+  rc2.style.display = 'flex';
+}
+
+function submitCapture() {
+  const email = document.getElementById('capture-email').value.trim();
+  const insta = document.getElementById('capture-insta').value.trim();
+  if (!email && !insta) {
+    document.getElementById('capture-email').style.borderColor = 'var(--terracotta)';
+    document.getElementById('capture-email').placeholder = '⚠️ Remplis au moins un champ';
+    return;
+  }
+  document.getElementById('capture-success').style.display = 'block';
+  document.querySelector('.btn-capture').style.display = 'none';
+  document.querySelector('.capture-skip').style.display = 'none';
+  setTimeout(() => {
+    document.getElementById('capture-card').style.display = 'none';
+    renderResultContent();
+  }, 1800);
+}
+
+function skipCapture() {
+  document.getElementById('capture-card').style.display = 'none';
+  renderResultContent();
+}
+
+function restartQuiz() {
+  current = 0;
+  answers = new Array(questions.length).fill(null);
+  scores = new Array(questions.length).fill(0);
+  document.getElementById('result').classList.add('hidden');
+  document.getElementById('result-content').style.display = 'none';
+  document.getElementById('capture-card').style.display = 'none';
+  document.getElementById('hero').classList.remove('hidden');
+  document.getElementById('start-card').classList.remove('hidden');
+  document.getElementById('progress-wrap').classList.add('hidden');
+  document.getElementById('quiz-card').classList.add('hidden');
+  document.getElementById('progress-fill').style.width = '0%';
+  document.querySelector('.btn-capture').style.display = 'block';
+  document.querySelector('.capture-skip').style.display = 'block';
+  document.getElementById('capture-success').style.display = 'none';
+  document.getElementById('capture-email').value = '';
+  document.getElementById('capture-insta').value = '';
+}
+</script>
+</body>
+</html>
