@@ -710,7 +710,7 @@ function renderResultContent() {
   rc2.style.display = 'flex';
 }
 
-function submitCapture() {
+async function submitCapture() {
   const email = document.getElementById('capture-email').value.trim();
   const insta = document.getElementById('capture-insta').value.trim();
   if (!email && !insta) {
@@ -718,6 +718,20 @@ function submitCapture() {
     document.getElementById('capture-email').placeholder = '⚠️ Remplis au moins un champ';
     return;
   }
+  const { total, result } = window._quizResult;
+  try {
+    await fetch('https://hook.eu1.make.com/t2fz8o99heylf7f2citnjobft26x2vdo', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        date: new Date().toLocaleString('fr-FR'),
+        email: email,
+        instagram: insta,
+        score: total + '/21',
+        profil: result.title
+      })
+    });
+  } catch(e) { console.log('Webhook error', e); }
   document.getElementById('capture-success').style.display = 'block';
   document.querySelector('.btn-capture').style.display = 'none';
   document.querySelector('.capture-skip').style.display = 'none';
